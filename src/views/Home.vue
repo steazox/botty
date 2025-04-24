@@ -1,6 +1,6 @@
 <template lang="">
     <div>
-        
+        <router-link to="/register">S'enregistrer</router-link>
     </div>
 </template>
 <script>
