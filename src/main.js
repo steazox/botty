@@ -5,6 +5,20 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import { initializeApp } from "firebase/app";
+
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCwHOagmHuR2WwxHJU9oXV20vTMP3u_HsA",
+  authDomain: "botty-e19d4.firebaseapp.com",
+  projectId: "botty-e19d4",
+  storageBucket: "botty-e19d4.firebasestorage.app",
+  messagingSenderId: "383861962357",
+  appId: "1:383861962357:web:d7c9b8c79f1150a404ea3c"
+};
+
+initializeApp(firebaseConfig);
 
 const app = createApp(App)
 
