@@ -28,9 +28,6 @@ const props = defineProps({
 });
 const router = useRouter();
 
-const handleFileUpload = (event) => {
-    profilePicture.value = event.target.files[0];
-};
 
 const saveProfile = async () => {
     try {

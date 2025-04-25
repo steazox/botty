@@ -16,12 +16,9 @@
 
     const register = () => {
         signInWithEmailAndPassword(getAuth(), email.value, password.value)
-            .then((data) => {
+            .then(() => {
                 console.log("Successfully registered!");
                 router.push('/feed');
             })
     };
-    const signInWithGoogle = () => {
-
-    }
 </script>
