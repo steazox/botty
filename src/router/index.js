@@ -19,11 +19,11 @@ const router = createRouter({
     },
     {
       path: '/feed',
-      component: Feed,
+      component: () => import('../views/Feed.vue'),
       meta: {
         requireAuth: true,
       },
-    },
+    },    
   ],
 });
 
