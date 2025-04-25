@@ -125,6 +125,11 @@
   .row {
     display: flex;
     flex-direction: row;
+<<<<<<< HEAD:src/views/feed.vue
   }
   </style>
   
+=======
+}
+</style>
+>>>>>>> 0b7bc91667bddaac43ad7482e089b34d1a7dad8e:src/views/Feed.vue
