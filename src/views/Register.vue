@@ -1,27 +1,43 @@
 <template>
-    <h1>Create An Account</h1><br>
-    <p><input type="text" placeholder="Email" v-model="email"/></p><br>
-    <p><input type="password" placeholder="Password" v-model="password"/></p><br>
-    <p><button @click="register">Submit</button></p><br>
-    <!-- <p><button @click="signInWithGoogle">Sign In With Google</button></p> -->
-</template>
-
-<script setup>
-    import { ref } from "vue";
-    import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-    import { useRouter } from 'vue-router'
-    const email = ref("");
-    const password = ref("");
-    const router = useRouter();
-
-    const register = () => {
-        createUserWithEmailAndPassword(getAuth(), email.value, password.value)
-            .then((data) => {
-                console.log("Successfully registered!");
-                router.push('/feed');
-            })
-    };
-    const signInWithGoogle = () => {
-
+    <h1>Create An Account</h1>
+    <br>
+    <p><input type="text" placeholder="Email" v-model="email" /></p>
+    <br>
+    <p><input type="password" placeholder="Password" v-model="password" /></p>
+    <br>
+    <p><button @click="register">Submit</button></p>
+    <ProfileModal v-if="showModal" @close="closeModal" :uid="userUid" />
+  </template>
+  
+  <script setup>
+  import { ref } from "vue";
+  import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+  import { useRouter } from "vue-router";
+  import ProfileModal from "../modal/ProfileModal.vue"; // Import du modal
+  
+  const email = ref("");
+  const password = ref("");
+  const showModal = ref(false);
+  const userUid = ref("");
+  const router = useRouter();
+  
+  const register = async () => {
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+      const user = userCredential.user;
+  
+      console.log("User registered!");
+      userUid.value = user.uid;
+      showModal.value = true; // Afficher le modal
+    } catch (error) {
+      console.error("Error during registration:", error);
     }
-</script>
+  };
+  
+  const closeModal = () => {
+    showModal.value = false;
+    router.push("/feed");
+  };
+  </script>
+  
