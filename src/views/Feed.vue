@@ -13,7 +13,7 @@
     <div v-for="post in posts" :key="post.id" class="post">
       <div class="header">
         <!-- Vérification si l'ID de l'auteur est défini avant d'afficher le lien -->
-        <a :href="`/profile/${getCurrentUser().uid}`" class="username">{{ post.author }}</a>
+        <router-link :to="`/profile/${getCurrentUser().uid}`" class="username">{{ post.author }}</router-link>
         <button class="follow">Suivre</button>
       </div>
       <div class="box-content">
