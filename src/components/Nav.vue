@@ -7,7 +7,7 @@
             <router-link to="/feed" class="nav-link" active-class="active-link">
               Feed
             </router-link>
-            <router-link to="" class="nav-link" active-class="active-link">
+            <router-link to="/profile" class="nav-link" active-class="active-link">
               Profile
             </router-link>
           </div>

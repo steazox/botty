@@ -24,6 +24,13 @@ const router = createRouter({
         requireAuth: true,
       },
     },    
+    {
+      path: '/porfile',
+      component: () => import('../views/Profile.vue'),
+      meta: {
+        requireAuth: true,
+      },
+    }
   ],
 });
 
