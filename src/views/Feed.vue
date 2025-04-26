@@ -12,8 +12,9 @@
     <!-- Liste des posts -->
     <div v-for="post in posts" :key="post.id" class="post">
       <div class="header">
-        <h3 class="username">{{ post.author }}</h3>
-        <button class="follow">follow</button>
+        <!-- Vérification si l'ID de l'auteur est défini avant d'afficher le lien -->
+        <a :href="`/profile/${getCurrentUser().uid}`" class="username">{{ post.author }}</a>
+        <button class="follow">Suivre</button>
       </div>
       <div class="box-content">
         <p>{{ post.content }}</p>
@@ -43,7 +44,7 @@
 import { ref, onMounted } from "vue";
 import { getFirestore, doc, getDoc, collection, query, getDocs, updateDoc, arrayUnion } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { createNewPost, likePost } from "../postService";
+import { createNewPost, likePost, getCurrentUser } from "../postService";
 
 const posts = ref([]);
 const showModal = ref(false);
@@ -53,7 +54,7 @@ const isLoading = ref(false);
 const auth = getAuth();
 const currentUser = auth.currentUser;
 
-const loadPosts = async (postsRef, start, limit) => {
+const loadPosts = async (postsRef) => {
   try {
     const db = getFirestore();
     const postsQuery = query(collection(db, "posts"));
@@ -62,13 +63,13 @@ const loadPosts = async (postsRef, start, limit) => {
     for (const docSnap of querySnapshot.docs) {
       const post = docSnap.data();
       post.id = docSnap.id;
-
+      console.log(post.authorId);
       if (post.authorId) {
-        const userRef = doc(db, "users", post.authorId);
+        const userRef = doc(db, "users", post.authorId); // Utilise authorId pour récupérer l'utilisateur
         const userSnap = await getDoc(userRef);
         post.author = userSnap.exists() ? userSnap.data().displayName || "Utilisateur inconnu" : "Utilisateur supprimé";
+        
       }
-
       post.comments = post.comments || [];
       postsRef.value.push(post);
     }
@@ -76,6 +77,7 @@ const loadPosts = async (postsRef, start, limit) => {
     console.error("Erreur lors du chargement des posts :", error);
   }
 };
+
 
 onMounted(() => {
   loadPosts(posts, 0, 10);
@@ -158,7 +160,6 @@ const onScroll = async (event) => {
 };
 </script>
 
-
 <style scoped>
 .feed-container {
   max-height: 80vh;
@@ -171,9 +172,9 @@ const onScroll = async (event) => {
 }
 
 .header {
-  background: rgb(54, 54, 54);
+  background: #363636;
   display: flex;
-  flex-direction: row;
+  align-items: center;
   border-radius: 20px 20px 0 0;
   padding: 10px;
   min-width: 200px;
@@ -181,13 +182,14 @@ const onScroll = async (event) => {
 }
 
 .username {
-  font-weight: 800;
-  margin-left: 50px;
+  font-weight: bold;
+  margin-left: 10px;
   color: #f1f1f1;
+  text-decoration: none;
 }
 
 .follow {
-  margin-left: 10px;
+  margin-left: auto;
   border: none;
   padding: 7px;
   border-radius: 12px;

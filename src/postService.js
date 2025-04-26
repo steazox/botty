@@ -2,6 +2,12 @@ import { collection, addDoc, getDocs, doc, getDoc, updateDoc, arrayUnion, arrayR
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
+// Fonction pour récupérer l'utilisateur actuel
+export const getCurrentUser = () => {
+  const auth = getAuth();
+  return auth.currentUser;
+};
+
 // Charger les posts
 export const loadPosts = async (postsRef) => {
   const db = getFirestore();
@@ -20,8 +26,7 @@ export const loadPosts = async (postsRef) => {
 // Créer un nouveau post
 export const createNewPost = async (userId, content) => {
   const db = getFirestore();
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const user = getCurrentUser();
 
   if (!user) {
     throw new Error("Utilisateur non authentifié");
@@ -55,10 +60,10 @@ export const createNewPost = async (userId, content) => {
   }
 };
 
+// Aimer un post
 export const likePost = async (postId) => {
   const db = getFirestore();
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const user = getCurrentUser();
 
   if (!user) {
     console.error("Utilisateur non authentifié");
