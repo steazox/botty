@@ -45,6 +45,7 @@ export const createNewPost = async (userId, content) => {
 
     const newPost = {
       author: authorName,
+      authorId: userId,
       content,
       likes: 0,
       likedBy: [],

@@ -13,16 +13,25 @@
     <div v-for="post in posts" :key="post.id" class="post">
       <div class="header">
         <!-- Vérification si l'ID de l'auteur est défini avant d'afficher le lien -->
-        <router-link :to="`/profile/${getCurrentUser().uid}`" class="username">{{ post.author }}</router-link>
+        <router-link :to="`/profile/${post.authorId}`" class="username">{{ post.author }}</router-link>
         <button class="follow">Suivre</button>
       </div>
       <div class="box-content">
         <p>{{ post.content }}</p>
         <div class="row">
-          <button @click="toggleLike(post)">
-            {{ post.likedBy?.includes(currentUser?.uid) ? "Je n'aime plus" : "J'aime" }}
+          <button class="like" @click="toggleLike(post)">
+            <svg v-if="post.likedBy?.includes(currentUser?.uid)" class="heart active" xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512">
+              <path
+                d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z" />
+            </svg>
+            <svg v-else class="heart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path
+                d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8l0-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5l0 3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9z" />
+            </svg>
           </button>
-          <p>{{ post.likes || 0 }} likes</p>
+          <p class="likeCtn">{{ post.likedBy?.length || 0 }}</p>
+
           <button @click="toggleCommentBox(post.id)">Répondre</button>
         </div>
         <div class="comments-section">
@@ -68,7 +77,7 @@ const loadPosts = async (postsRef) => {
         const userRef = doc(db, "users", post.authorId); // Utilise authorId pour récupérer l'utilisateur
         const userSnap = await getDoc(userRef);
         post.author = userSnap.exists() ? userSnap.data().displayName || "Utilisateur inconnu" : "Utilisateur supprimé";
-        
+
       }
       post.comments = post.comments || [];
       postsRef.value.push(post);
@@ -162,6 +171,26 @@ const onScroll = async (event) => {
 </script>
 
 <style scoped>
+.likeCtn {
+  margin-right: 10px;
+  font-weight: 900;
+}
+.like .heart.active {
+  fill: #ff0000; /* Couleur pour le "like" actif */
+}
+.like .heart {
+  fill: #cccccc; /* Couleur par défaut */
+}
+.heart {
+  width: 22px;
+  height: 22px;
+  fill: red; /* Couleur de l'icône */
+}
+.like {
+  background: transparent;
+  border: none;
+}
+
 .feed-container {
   max-height: 80vh;
   overflow-y: auto;
@@ -233,5 +262,10 @@ const onScroll = async (event) => {
   border: 1px solid #ddd;
   border-radius: 8px;
   resize: none;
+}
+
+.heart {
+
+  z-index: 99;
 }
 </style>
