@@ -1,20 +1,27 @@
 <template>
     <div>
-      <img src="/pp.jpg" class="pp" />
+      <div class="image-container">
+        <img v-if="user.uid == userId" src="/pp.jpg" class="pp mod" />
+        <div v-if="user.uid == userId" class="overlay">
+          <input ref="fileInput" type="file" class="" />
+          <button @click="openFileInput" class="edit-button">Modifier la photo</button>
+        </div>
+        <img v-else src="/pp.jpg" class="pp" />
+      </div>
       <div class="box">
         <span class="username">{{ authorName }}</span><br />
         <span class="displayname">{{ hashtagName }}</span><br />
         <button @click="follow(userId)" v-if="user.uid != userId" class="follow">Follow</button>
-        <button @click="" v-else class="edit">Modifier le compte</button>
+        <button @click="editProfile" v-else class="edit">Modifier le compte</button>
       </div>
     </div>
   </template>
   
   <script>
-  import { ref, onMounted } from "vue";
+  import { ref, onMounted, nextTick } from "vue";
   import { useRoute } from "vue-router";
   import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+  import { getAuth } from "firebase/auth";
   
   export default {
     name: "UserProfile",
@@ -23,15 +30,31 @@ import { getAuth } from "firebase/auth";
       const userId = route.params.userId;
       const authorName = ref("Chargement...");
       const hashtagName = ref("Chargement...");
-      const user = getAuth().currentUser
+      const user = getAuth().currentUser;
   
       const follow = async (id) => {
         console.log("Followed user with ID:", id);
-        if(id == user.uid) {
-            console.log("vous ne pouvez pas vous suivre vous meme")
+        if (id == user.uid) {
+          console.log("Vous ne pouvez pas vous suivre vous-même");
         } else {
-            
+          
         }
+      };
+  
+      const fileInput = ref(null);
+  
+      const openFileInput = async () => {
+        await nextTick(); // Assure-toi que le DOM est prêt
+        if (fileInput.value) {
+          fileInput.value.click();
+        } else {
+          console.error("fileInput est null, vérifie que l'élément existe.");
+        }
+      };
+  
+      const editProfile = () => {
+        console.log("Modification du compte de l'utilisateur");
+        // Logique pour modifier le profil
       };
   
       onMounted(async () => {
@@ -69,20 +92,64 @@ import { getAuth } from "firebase/auth";
         userId,
         follow,
         user,
+        openFileInput,
+        editProfile,
       };
     },
   };
   </script>
   
-  <style scoped>
-  .pp {
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-  }
-  .box {
+
+<style scoped>
+.image-container {
+  width: 100%;
+  height: 100px;
+}
+
+.mod:hover + .overlay,
+.overlay:hover {
+  display: flex;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.edit-button {
+  background: rgba(255, 255, 255, 0.8);
+  color: #313131;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  position: absolute;
+  top: 20%;
+}
+
+.edit-button:hover {
+  background: #ffffff;
+}
+.pp {
+  width: 100%;
+  padding: -32px;
+
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+
+.box {
     background: #313131;
     z-index: 1;
     width: 100%;
@@ -92,18 +159,20 @@ import { getAuth } from "firebase/auth";
     height: 60%;
     border-radius: 25px 25px 0 0;
     padding: 30px;
-  }
-  .username {
-    font-weight: 600;
-    line-height: 1.2;
-    color: #f1f1f1;
-    font-size: xx-large;
-  }
-  .displayname {
+}
+.username {
+  font-weight: 600;
+  line-height: 1.2;
+  color: #f1f1f1;
+  font-size: xx-large;
+}
+
+.displayname {
     line-height: 1.2;
     color: #bbb;
-  }
-  .follow {
+}
+
+.follow {
     width: 100%;
     height: 40px;
     margin: 10px 0;
@@ -114,12 +183,13 @@ import { getAuth } from "firebase/auth";
     color: #313131;
     background-color: #f1f1f1;
     cursor: pointer;
-  }
-  .follow:hover {
-    background-color: #e1e1e1;
-  }
+}
 
-  .edit {
+.follow:hover {
+    background-color: #e1e1e1;
+}
+
+.edit {
     width: 100%;
     height: 40px;
     margin: 10px 0;
@@ -132,6 +202,8 @@ import { getAuth } from "firebase/auth";
     color: #f1f1f1;
     background-color: #313131;
     cursor: pointer;
-  }
-  </style>
-  
+}
+.d-none {
+    display: none;
+}
+</style>
