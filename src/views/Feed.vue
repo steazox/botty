@@ -32,7 +32,7 @@
             <button @click="submitComment(post)">Poster</button>
           </div>
           <div v-for="comment in post.comments || []" :key="comment.timestamp" class="comment">
-            <strong>{{ comment.username }}</strong>: {{ comment.content }}
+            <router-link :to="`/profile/${comment.userId}`">{{ comment.username }}</router-link>: {{ comment.content }}
           </div>
         </div>
       </div>
@@ -123,6 +123,7 @@ const submitComment = async (post) => {
       post.comments.push(comment);
       post.newComment = "";
       post.showCommentBox = false;
+
     } catch (error) {
       console.error("Erreur lors de l'ajout du commentaire :", error);
       alert("Une erreur est survenue. Veuillez réessayer.");
@@ -168,7 +169,7 @@ const onScroll = async (event) => {
 }
 
 .post {
-  margin: 20px;
+  margin: 20px 0px 20px 0px;
 }
 
 .header {
