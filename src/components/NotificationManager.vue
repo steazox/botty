@@ -1,9 +1,9 @@
 <template>
   <div class="notification-manager">
-    <button @click="showNotification" v-if="notificationPermission === 'granted'">
+    <button @click="showNotification">
       Envoyer une notification
     </button>
-    <button @click="requestPermission" v-else>
+    <button @click="requestPermission">
       Demander la permission pour les notifications
     </button>
   </div>
@@ -24,7 +24,6 @@ const requestPermission = async () => {
 }
 
 const showNotification = () => {
-  if (notificationPermission.value === 'granted') {
     const notification = new Notification('Nouvelle notification', {
       body: 'Ceci est une notification PWA',
       icon: '/icon.png',
