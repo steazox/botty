@@ -34,7 +34,6 @@ const showNotification = () => {
     notification.onclick = () => {
       window.focus()
     }
-  }
 }
 
 // Vérifier la permission au montage
