@@ -53,11 +53,14 @@ export const createNewPost = async (userId, content) => {
     };
 
     const postsCollection = collection(db, "posts");
-    await addDoc(postsCollection, newPost);
-
-    console.log("Post créé avec succès !");
+    const postRef = await addDoc(postsCollection, newPost);
+    
+    // Récupérer le post avec son ID
+    const postSnap = await getDoc(postRef);
+    return { id: postRef.id, ...postSnap.data() };
   } catch (error) {
     console.error("Erreur lors de la création du post :", error);
+    throw error;
   }
 };
 
@@ -67,45 +70,44 @@ export const likePost = async (postId) => {
   const user = getCurrentUser();
 
   if (!user) {
-    console.error("Utilisateur non authentifié");
-    return null;
+    throw new Error("Utilisateur non authentifié");
   }
 
   const postRef = doc(db, "posts", postId);
 
   try {
     const postSnap = await getDoc(postRef);
-    if (postSnap.exists()) {
-      const postData = postSnap.data();
-      const likedBy = postData.likedBy || [];
-
-      let updatedLikes = postData.likes || 0;
-
-      if (likedBy.includes(user.uid)) {
-        // Retirer le like
-        updatedLikes -= 1;
-        await updateDoc(postRef, {
-          likes: updatedLikes > 0 ? updatedLikes : 0,
-          likedBy: arrayRemove(user.uid),
-        });
-      } else {
-        // Ajouter un like
-        updatedLikes += 1;
-        await updateDoc(postRef, {
-          likes: updatedLikes,
-          likedBy: arrayUnion(user.uid),
-        });
-      }
-
-      // Retourner les données mises à jour
-      const updatedPostSnap = await getDoc(postRef);
-      return { id: postId, ...updatedPostSnap.data() };
-    } else {
-      console.error("Post introuvable");
-      return null;
+    if (!postSnap.exists()) {
+      throw new Error("Post introuvable");
     }
+
+    const postData = postSnap.data();
+    const likedBy = postData.likedBy || [];
+
+    let updatedLikes = postData.likes || 0;
+
+    if (likedBy.includes(user.uid)) {
+      // Retirer le like
+      updatedLikes -= 1;
+      await updateDoc(postRef, {
+        likes: updatedLikes > 0 ? updatedLikes : 0,
+        likedBy: arrayRemove(user.uid),
+      });
+    } else {
+      // Ajouter un like
+      updatedLikes += 1;
+      await updateDoc(postRef, {
+        likes: updatedLikes,
+        likedBy: arrayUnion(user.uid),
+      });
+    }
+
+    // Récupérer le post mis à jour
+    const updatedPostSnap = await getDoc(postRef);
+    return { id: postId, ...updatedPostSnap.data() };
+
   } catch (error) {
-    console.error("Erreur lors de l'ajout/retrait du like :", error);
-    return null;
+    console.error("Erreur lors du like :", error);
+    throw error;
   }
 };

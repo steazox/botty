@@ -54,14 +54,12 @@ import { ref, onMounted } from "vue";
 import { getFirestore, doc, getDoc, collection, query, getDocs, updateDoc, arrayUnion } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { createNewPost, likePost, getCurrentUser } from "../postService";
+import { showNotification } from "../notificationService";
 
 const posts = ref([]);
 const showModal = ref(false);
 const newPostContent = ref("");
 const isLoading = ref(false);
-
-const auth = getAuth();
-const currentUser = auth.currentUser;
 
 const loadPosts = async (postsRef) => {
   try {
@@ -103,16 +101,17 @@ const toggleCommentBox = (postId) => {
 const submitComment = async (post) => {
   if (post.newComment.trim()) {
     try {
-      const db = getFirestore();
-      const user = auth.currentUser;
-
-      if (!user) {
+      // Afficher la notification avant d'envoyer le commentaire
+      await showNotification('Nouveau commentaire', `Vous avez commenté le post de ${post.author}`);
+      
+      if (!currentUser) {
         alert("Vous devez être connecté pour poster un commentaire !");
         return;
       }
 
+      const db = getFirestore();
       const postRef = doc(db, "posts", post.id);
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "users", currentUser.uid);
 
       const userSnapshot = await getDoc(userRef);
       if (!userSnapshot.exists()) throw new Error("Utilisateur non trouvé dans Firestore");
@@ -121,7 +120,7 @@ const submitComment = async (post) => {
       const authorName = userData.displayName || "Utilisateur inconnu";
 
       const comment = {
-        userId: user.uid,
+        userId: currentUser.uid,
         username: authorName,
         content: post.newComment.trim(),
         timestamp: new Date().toISOString(),
@@ -143,19 +142,53 @@ const submitComment = async (post) => {
 };
 
 const createPost = async () => {
-  if (currentUser && newPostContent.value.trim()) {
-    const newPost = await createNewPost(currentUser.uid, newPostContent.value.trim());
-    posts.value.unshift(newPost);
-    newPostContent.value = "";
-    showModal.value = false;
+  const user = getCurrentUser();
+  
+  if (!user) {
+    alert("Vous devez être connecté pour créer un post !");
+    return;
+  }
+
+  if (!newPostContent.value.trim()) {
+    alert("Le contenu du post ne peut pas être vide !");
+    return;
+  }
+
+  try {
+    const newPost = await createNewPost(user.uid, newPostContent.value.trim());
+    if (newPost) {
+      posts.value.unshift(newPost);
+      newPostContent.value = "";
+      showModal.value = false;
+    }
+  } catch (error) {
+    console.error("Erreur lors de la création du post:", error);
+    alert("Une erreur est survenue lors de la création du post. Veuillez réessayer.");
   }
 };
 
 const toggleLike = async (post) => {
-  const updatedPost = await likePost(post.id);
-  const index = posts.value.findIndex((p) => p.id === post.id);
-  if (index !== -1) {
-    posts.value[index] = { ...updatedPost };
+  const user = getCurrentUser();
+  
+  if (!user) {
+    alert("Vous devez être connecté pour aimer un post !");
+    return;
+  }
+
+  try {
+    // Afficher la notification avant de liker
+    await showNotification('Nouveau like', `Vous avez aimé le post de ${post.author}`);
+
+    const updatedPost = await likePost(post.id);
+    if (updatedPost) {
+      const index = posts.value.findIndex((p) => p.id === post.id);
+      if (index !== -1) {
+        posts.value[index] = { ...updatedPost };
+      }
+    }
+  } catch (error) {
+    console.error("Erreur lors du like:", error);
+    alert("Une erreur est survenue lors du like. Veuillez réessayer.");
   }
 };
 
@@ -184,7 +217,15 @@ const onScroll = async (event) => {
 .heart {
   width: 22px;
   height: 22px;
-  fill: red; /* Couleur de l'icône */
+  transition: fill 0.3s ease;
+}
+
+.heart.active {
+  fill: red;
+}
+
+.heart:not(.active) {
+  fill: #cccccc;
 }
 .like {
   background: transparent;

@@ -7,8 +7,39 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { initializeApp } from "firebase/app";
-import './registerServiceWorker'
+import { register } from 'register-service-worker'
 
+// Register the service worker
+register('/service-worker.js', {
+  ready() {
+    console.log('Service Worker: Ready')
+  },
+  registered() {
+    console.log('Service Worker: Registered')
+  },
+  cached() {
+    console.log('Service Worker: Cached')
+  },
+  updatefound() {
+    console.log('Service Worker: New content is downloading')
+  },
+  updated() {
+    console.log('Service Worker: New content is available')
+  },
+  offline() {
+    console.log('Service Worker: App is offline')
+  },
+  error(error) {
+    console.error('Service Worker Error:', error)
+  }
+})
+
+// Request notification permission
+if ('Notification' in window) {
+  Notification.requestPermission().then(function(permission) {
+    console.log('Notification permission status:', permission)
+  })
+}
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
